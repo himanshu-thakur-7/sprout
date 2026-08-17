@@ -1,12 +1,11 @@
 /**
- * Learn more about Light and Dark modes:
- * https://docs.expo.io/guides/color-schemes/
+ * Themed Text/View bound to the Quiet Progress design system.
+ * See constants/theme.ts and DESIGN_SYSTEM.md.
  */
 import { Text as DefaultText, View as DefaultView } from 'react-native';
 
-import { useColorScheme } from './useColorScheme';
-
-import Colors from '@/constants/Colors';
+import { useTheme } from '@/constants/theme';
+import { ThemeColors } from '@/constants/colors';
 
 type ThemeProps = {
   lightColor?: string;
@@ -18,21 +17,21 @@ export type ViewProps = ThemeProps & DefaultView['props'];
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+  colorName: keyof ThemeColors
 ) {
-  const theme = useColorScheme();
-  const colorFromProps = props[theme];
+  const theme = useTheme();
+  const colorFromProps = props[theme.scheme];
 
   if (colorFromProps) {
     return colorFromProps;
   } else {
-    return Colors[theme][colorName];
+    return theme.colors[colorName];
   }
 }
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'textPrimary');
 
   return <DefaultText style={[{ color }, style]} {...otherProps} />;
 }

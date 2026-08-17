@@ -1,70 +1,53 @@
-import { SymbolView } from 'expo-symbols';
-import { Link, Tabs } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { SoftTabBar, SoftTabItem } from '@/components/ui';
+
+const TAB_ITEMS: SoftTabItem[] = [
+  {
+    key: 'index',
+    label: 'Today',
+    icon: ({ color, size }) => <Ionicons name="sunny-outline" size={size} color={color} />,
+  },
+  {
+    key: 'week',
+    label: 'Week',
+    icon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} />,
+  },
+  {
+    key: 'circles',
+    label: 'Circles',
+    icon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} />,
+  },
+  {
+    key: 'profile',
+    label: 'Profile',
+    icon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+  },
+];
+
+// Minimal shape we actually use from React Navigation's tab bar render-prop —
+// kept local instead of importing the internal type, since expo-router
+// vendors its own copy of @react-navigation/bottom-tabs rather than
+// depending on the public package.
+type TabBarRenderProps = {
+  state: { routeNames: string[]; index: number };
+  navigation: { navigate: (key: string) => void };
+};
+
+function TabBar({ state, navigation }: TabBarRenderProps) {
+  const activeKey = state.routeNames[state.index];
+
+  return <SoftTabBar items={TAB_ITEMS} activeKey={activeKey} onChange={(key) => navigation.navigate(key)} />;
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
-          ),
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable style={{ marginRight: 15 }}>
-                {({ pressed }) => (
-                  <SymbolView
-                    name={{ ios: 'info.circle', android: 'info', web: 'info' }}
-                    size={25}
-                    tintColor={Colors[colorScheme].text}
-                    style={{ opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
-          ),
-        }}
-      />
+    <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false }}>
+      <Tabs.Screen name="index" options={{ title: 'Today' }} />
+      <Tabs.Screen name="week" options={{ title: 'Week' }} />
+      <Tabs.Screen name="circles" options={{ title: 'Circles' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
 }

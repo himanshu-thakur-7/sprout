@@ -1,31 +1,46 @@
-import { StyleSheet } from 'react-native';
+import React from 'react';
+import { View } from 'react-native';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+import { useTheme } from '@/constants/theme';
+import { useTodayHabits } from '@/data';
+import { Header, MascotGlow, ProgressRing, HabitCard, ScreenContainer } from '@/components/ui';
 
-export default function TabOneScreen() {
+/** "Today" — screen 1: weekly ring + one-tap habit toggles, backed by the local data store. */
+export default function TodayScreen() {
+  const theme = useTheme();
+  const { items, weeklyStats, toggleHabitToday } = useTodayHabits();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <>
+      <StatusBar style="dark" />
+      <ScreenContainer testID="today-screen">
+        <Header layout="row" leading={<MascotGlow size="sm" />} title="Today" />
+
+        <View style={{ alignItems: 'center', marginTop: theme.spacing[6], marginBottom: theme.spacing[6] }}>
+          <ProgressRing
+            progress={weeklyStats.total ? weeklyStats.done / weeklyStats.total : 0}
+            valueLabel={`${weeklyStats.done}/${weeklyStats.total}`}
+            caption="HABITS THIS WEEK"
+          />
+        </View>
+
+        <View style={{ gap: theme.layout.cardGap }}>
+          {items.map(({ habit, doneToday }) => (
+            <HabitCard
+              key={habit.id}
+              icon={<Ionicons name={habit.icon} size={20} color={theme.colors.primaryText} />}
+              title={habit.title}
+              subtitle={habit.frequencyLabel}
+              completed={doneToday}
+              onToggle={() => toggleHabitToday(habit.id)}
+              onPress={() => router.push({ pathname: '/habit/[id]', params: { id: habit.id } })}
+            />
+          ))}
+        </View>
+      </ScreenContainer>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
